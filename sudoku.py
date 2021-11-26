@@ -1,3 +1,6 @@
+# JUEGO SUDOKU, ELABORADO POR AMANDA MONTERO Z. TALLER DE PROGRAMACION. ENTREGA: 1/12/2021
+
+
 ########################
 #       MODULOS        #
 ########################
@@ -24,6 +27,57 @@ ventana1.resizable(False, False)
 inicio = False
 
 # colores y letras GUI
+COLOR_BORDE = "#A39489"
+CELDA_VACIA = "#C2B3A9"
+FUENTE_ETIQUETA_PUNTAJE = ("Verdana", 24)
+FUENTE_PUNTAJE = ("Helvetica", 36, "bold")
+JUEGO_TERMINADO_FUENTE = ("Candara", 28, "bold")
+JUEGO_TERMINADO_COLOR = ("#ffffff")
+GANAR_BG = "#72FF35"
+PERDER_BG = "#A39489"
+
+COLORES_CELDAS = {
+    2: "#E0EBC2",
+    4: "#ECE473",
+    8: "#F9D422",
+    16: "#F28F3F",
+    32: "#E94F53",
+    64: "#ECBE14",
+    128: "#6FA84B",
+    256: "#34B5AA",
+    512: "#309191",
+    1024: "#066D8B",
+    2048: "#6C3483"
+}
+
+COLORES_NUMEROS = {
+    0: "#C2B3A9",
+    2: "#000000",
+    4: "#000000",
+    8: "#000000",
+    16: "#000000",
+    32: "#FFFFFF",
+    64: "#FFFFFF",
+    128: "#FFFFFF",
+    256: "#FFFFFF",
+    512: "#FFFFFF",
+    1024: "#FFFFFF",
+    2048: "#FFFFFF"
+}
+
+FUENTES_NUMEROS = {
+    2: ("Cooper", 45, "bold"),
+    4: ("Cooper", 45, "bold"),
+    8: ("Cooper", 45, "bold"),
+    16: ("Cooper", 40, "bold"),
+    32: ("Cooper", 40, "bold"),
+    64: ("Cooper", 40, "bold"),
+    128: ("Cooper", 35, "bold"),
+    256: ("Cooper", 35, "bold"),
+    512: ("Cooper", 35, "bold"),
+    1024: ("Cooper", 30, "bold"),
+    2048: ("Cooper", 30, "bold")
+}
 
 
 def juego_principal():
@@ -38,9 +92,9 @@ def juego_principal():
     pygame.mixer.init()
 
     # TÍTULO
-    texto_2048 = "Sudoku"
+    texto_sudoku = "Sudoku"
     etiqueta_titulo = tk.Label(
-        ventana, text=texto_2048, font=("Berlin Sans FB", 35))
+        ventana, text=texto_sudoku, font=("Berlin Sans FB", 35))
     etiqueta_titulo.place(x=270, y=7)
 
     # NOMBRE JUGADOR
