@@ -26,59 +26,6 @@ ventana1.resizable(False, False)
 # Para iniciar la partida
 inicio = False
 
-# colores y letras GUI
-COLOR_BORDE = "#A39489"
-CELDA_VACIA = "#C2B3A9"
-FUENTE_ETIQUETA_PUNTAJE = ("Verdana", 24)
-FUENTE_PUNTAJE = ("Helvetica", 36, "bold")
-JUEGO_TERMINADO_FUENTE = ("Candara", 28, "bold")
-JUEGO_TERMINADO_COLOR = ("#ffffff")
-GANAR_BG = "#72FF35"
-PERDER_BG = "#A39489"
-
-COLORES_CELDAS = {
-    2: "#E0EBC2",
-    4: "#ECE473",
-    8: "#F9D422",
-    16: "#F28F3F",
-    32: "#E94F53",
-    64: "#ECBE14",
-    128: "#6FA84B",
-    256: "#34B5AA",
-    512: "#309191",
-    1024: "#066D8B",
-    2048: "#6C3483"
-}
-
-COLORES_NUMEROS = {
-    0: "#C2B3A9",
-    2: "#000000",
-    4: "#000000",
-    8: "#000000",
-    16: "#000000",
-    32: "#FFFFFF",
-    64: "#FFFFFF",
-    128: "#FFFFFF",
-    256: "#FFFFFF",
-    512: "#FFFFFF",
-    1024: "#FFFFFF",
-    2048: "#FFFFFF"
-}
-
-FUENTES_NUMEROS = {
-    2: ("Cooper", 45, "bold"),
-    4: ("Cooper", 45, "bold"),
-    8: ("Cooper", 45, "bold"),
-    16: ("Cooper", 40, "bold"),
-    32: ("Cooper", 40, "bold"),
-    64: ("Cooper", 40, "bold"),
-    128: ("Cooper", 35, "bold"),
-    256: ("Cooper", 35, "bold"),
-    512: ("Cooper", 35, "bold"),
-    1024: ("Cooper", 30, "bold"),
-    2048: ("Cooper", 30, "bold")
-}
-
 
 def juego_principal():
 
@@ -89,6 +36,13 @@ def juego_principal():
         ventana, bd=3, width=270, height=220)
     ventana.main_grid.place(x=170, y=80)
     ventana.resizable(False, False)
+
+    errLabel = tk.Label(ventana, text="", fg="red")
+    errLabel.grid(row=15, column=1, columnspan=10, pady=5)
+
+    solvedLabel = tk.Label(ventana, text="", fg="green")
+    solvedLabel.grid(row=15, column=1, columnspan=10, pady=5)
+
     pygame.mixer.init()
 
     # TÍTULO
@@ -109,6 +63,57 @@ def juego_principal():
                            textvariable=nombre)
     nombreEntry.place(x=500, y=38)
     print(nombre.get())
+
+    # TABLA
+    cells = {}
+
+    def validarNumero(P):
+        out = (P.isdigit() or P == "") and len(P) < 2
+        return out
+
+    reg = ventana.register(validarNumero)
+
+    def dibujar3x3(row, column, bgcolor):
+        for i in range(3):
+            for j in range(3):
+                e = tk.Entry(ventana.main_grid, width=5, bg=bgcolor,
+                             justify="center", validate="key", validatecommand=(reg, "%P"))
+                e.grid(row=row+i+1, column=column+j+1,
+                       sticky="nsew", padx=1, pady=1, ipady=5)
+                cells[(row+i+1, column+j+1)] = e
+
+    def dibujar9x9():
+        color = "#D0ffff"
+        for rowNo in range(1, 10, 3):
+            for colNo in range(0, 9, 3):
+                dibujar3x3(rowNo, colNo, color)
+                if color == "#D0ffff":
+                    color = "#ffffd0"
+                else:
+                    color = "#D0ffff"
+
+    def clearValues():
+        errLabel.configure(text="")
+        solvedLabel.configure(text="")
+        for row in range(2, 11):
+            for col in range(1, 10):
+                cell = cells[(row, col)]
+                cell.delete(0, "end")
+
+    def getValues():
+        board = []
+        errLabel.configure(text="")
+        solvedLabel.configure(text="")
+        for row in range(2, 11):
+            rows = []
+            for col in range(1, 10):
+                val = cells[(row, col)].get()
+                if val == "":
+                    rows.append(0)
+                else:
+                    rows.append(int(val))
+
+            board.append(rows)
 
     # TIMER
     hora = StringVar()
@@ -290,6 +295,14 @@ def juego_principal():
                            command=cargar_juego1)
     btn_cargar.place(x=310, y=575)
 
+    # btn = tk.Button(ventana, command=getValues, text="Solve", width=10)
+    # btn.grid(row=20, column=1, columnspan=5, pady=20)
+
+    # btn = tk.Button(ventana, command=clearValues, text="Clear", width=10)
+    # btn.grid(row=20,column=1, columnspan=5, pady=20)
+
+    dibujar9x9()
+
     ventana.mainloop()
 
 # BARRA DE MENU PRINCIPAL
@@ -360,8 +373,8 @@ exit_menu.add_command(label="Salir",
 menubar.add_cascade(label="Salir", menu=exit_menu)
 ventana1.config(menu=menubar)
 
-# INFO TIMER “2048configuración.dat”
-# INFO TOP 10 “2048top10.dat”.
+# INFO TIMER “2048configuración.dat"
+# INFO TOP 10 “2048top10.dat".
 
 
 ventana1.mainloop()
