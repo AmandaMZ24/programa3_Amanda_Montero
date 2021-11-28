@@ -66,6 +66,15 @@ def juego_principal():
 
     # TABLA
     cells = {}
+    valoresFacil = [[8,"",6,7,"",5,"","",""],
+                    ["",2,5,3,8,"",6,9,""],
+                    [7,"","","","","","",2,""],
+                    ["","",3,8,1,7,"","",""],
+                    [6,7,9,"","","",4,1,8],
+                    ["","","",9,4,6,3,"",""],
+                    ["",6,"","","","","","",""],
+                    ["",8,7,"",9,4,2,5,""],
+                    ["","","",5,"",2,7,"",6]]
 
     def validarNumero(P):
         out = (P.isdigit() or P == "") and len(P) < 2
@@ -73,48 +82,45 @@ def juego_principal():
 
     reg = ventana.register(validarNumero)
 
-    def dibujar3x3(row, column, bgcolor):
-        for i in range(3):
-            for j in range(3):
-                e = tk.Entry(ventana.main_grid, width=5, bg=bgcolor,
-                             justify="center", validate="key", validatecommand=(reg, "%P"))
-                e.grid(row=row+i+1, column=column+j+1,
-                       sticky="nsew", padx=1, pady=1, ipady=5)
-                cells[(row+i+1, column+j+1)] = e
+    
+    tabla = []
+    for i in range(1, 10):
+        tabla += [[0, 0, 0, 0, 0, 0, 0, 0, 0]]
 
-    def dibujar9x9():
-        color = "#D0ffff"
-        for rowNo in range(1, 10, 3):
-            for colNo in range(0, 9, 3):
-                dibujar3x3(rowNo, colNo, color)
-                if color == "#D0ffff":
-                    color = "#ffffd0"
-                else:
-                    color = "#D0ffff"
+    for i in range(0, 9):
+        for j in range(0, 9):
 
-    def clearValues():
-        errLabel.configure(text="")
-        solvedLabel.configure(text="")
-        for row in range(2, 11):
-            for col in range(1, 10):
-                cell = cells[(row, col)]
-                cell.delete(0, "end")
+            if (i < 3 or i > 5) and (j < 3 or j > 5):
+                color = 'gray'
+            elif i in [3, 4, 5] and j in [3, 4, 5]:
+                color = 'gray'
+            else:
+                color = 'white'
 
-    def getValues():
-        board = []
-        errLabel.configure(text="")
-        solvedLabel.configure(text="")
-        for row in range(2, 11):
-            rows = []
-            for col in range(1, 10):
-                val = cells[(row, col)].get()
-                if val == "":
-                    rows.append(0)
-                else:
-                    rows.append(int(val))
+            tabla[i][j] = tk.Entry(ventana.main_grid, width=2, font=("Comic Sans MS",18), bg=color, cursor='arrow', borderwidth=0,
+                                        highlightcolor='yellow', highlightthickness=1, highlightbackground='black',
+                                        textvar=valoresFacil[i][j])
+                
+    
 
-            board.append(rows)
+    # def done_or_not(board):
+    #     getValues()
+    #     square = [
+    #         board[i][j:j + 3] + board[i + 1][j:j + 3] + board[i + 2][j:j + 3]
+    #         for i in range(0, 9, 3)
+    #         for j in range(0, 9, 3)]
 
+    #     for i in range(9):
+    #         col = [board[j][i] for j in range(9)]
+    #         if list(set(board[i])) != sorted(board[i]) or list(set(col)) != sorted(col) or list(set(square[i])) != sorted(square[i]):
+    #             return "Try again!"
+
+    #     print(square)
+    #     return "Finished!"
+
+    
+        
+    
     # TIMER
     hora = StringVar()
     minuto = StringVar()
@@ -301,7 +307,7 @@ def juego_principal():
     # btn = tk.Button(ventana, command=clearValues, text="Clear", width=10)
     # btn.grid(row=20,column=1, columnspan=5, pady=20)
 
-    dibujar9x9()
+    
 
     ventana.mainloop()
 
@@ -350,7 +356,7 @@ menubar.add_cascade(label="Ayuda", menu=help_menu)
 info_menu = tk.Menu(menubar, tearoff=0)
 
 info_menu.add_command(label="Acerca de",
-                      command=lambda: showMessage("Acerca de", "Programa: Juego 2048. \n Versión: 1.0.0.\n Fecha de creación: 07/11/2021 \n Elaborado por: Amanda Montero Z."))
+                      command=lambda: showMessage("Acerca de", "Programa: Sudoku. \n Versión: 1.7.1.\n Fecha de creación: 1/12/2021 \n Elaborado por: Amanda Montero Z."))
 
 menubar.add_cascade(label="Acerca de", menu=info_menu)
 
@@ -372,9 +378,5 @@ exit_menu.add_command(label="Salir",
 
 menubar.add_cascade(label="Salir", menu=exit_menu)
 ventana1.config(menu=menubar)
-
-# INFO TIMER “2048configuración.dat"
-# INFO TOP 10 “2048top10.dat".
-
 
 ventana1.mainloop()
