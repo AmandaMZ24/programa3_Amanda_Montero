@@ -34,7 +34,7 @@ def juego_principal():
     ventana.geometry("750x650")
     ventana.main_grid = tk.Frame(
         ventana, bd=3, width=270, height=220)
-    ventana.main_grid.place(x=170, y=80)
+    ventana.main_grid.place(x=150, y=80)
     ventana.resizable(False, False)
 
     errLabel = tk.Label(ventana, text="", fg="red")
@@ -66,15 +66,17 @@ def juego_principal():
 
     # TABLA
     cells = {}
-    valoresFacil = [[8,"",6,7,"",5,"","",""],
-                    ["",2,5,3,8,"",6,9,""],
-                    [7,"","","","","","",2,""],
-                    ["","",3,8,1,7,"","",""],
-                    [6,7,9,"","","",4,1,8],
-                    ["","","",9,4,6,3,"",""],
-                    ["",6,"","","","","","",""],
-                    ["",8,7,"",9,4,2,5,""],
-                    ["","","",5,"",2,7,"",6]]
+    valoresFacil = [["8","","6","7","","5","","",""],
+                    ["","2","5","3","8","","6","9",""],
+                    ["7","","","","","","","2",""],
+                    ["","","3","8","1","7","","",""],
+                    ["6","7","9","","","","4","1","8"],
+                    ["","","","9","4","6","3","",""],
+                    ["","6","","","","","","",""],
+                    ["","8","7","","9","4","2","5",""],
+                    ["","","","5","","2","7","","6"]]
+
+    respaldoValores = valoresFacil
 
     def validarNumero(P):
         out = (P.isdigit() or P == "") and len(P) < 2
@@ -82,25 +84,39 @@ def juego_principal():
 
     reg = ventana.register(validarNumero)
 
-    
-    tabla = []
-    for i in range(1, 10):
-        tabla += [[0, 0, 0, 0, 0, 0, 0, 0, 0]]
+    cells = {}
 
+    def dibujarCuadros():
+        for i in range(9):
+            for j in range(9):
+                
+                if (i < 3 or i > 5) and (j < 3 or j > 5):
+                    color = 'gray'
+                elif i in [3, 4, 5] and j in [3, 4, 5]:
+                    color = 'gray'
+                else:
+                    color = 'white'
+
+                e = tk.Entry(ventana.main_grid, width=5, bg=color,font=("Comic Sans MS", 12),
+                             justify="center", validate="key")
+                e.grid(row=i+1, column=j+1,
+                       sticky="nsew", padx=1, pady=1, ipady=5)
+                e.insert(0, valoresFacil[i][j])
+                cells[(i,j)] = e
+
+        print(cells)
+
+
+    dibujarCuadros()
+
+    savedNumbers = []
+    for i in range(1, 10):
+        savedNumbers += [[0, 0, 0, 0, 0, 0, 0, 0, 0]]
     for i in range(0, 9):
         for j in range(0, 9):
+            savedNumbers[i][j] = StringVar(ventana)
 
-            if (i < 3 or i > 5) and (j < 3 or j > 5):
-                color = 'gray'
-            elif i in [3, 4, 5] and j in [3, 4, 5]:
-                color = 'gray'
-            else:
-                color = 'white'
-
-            tabla[i][j] = tk.Entry(ventana.main_grid, width=2, font=("Comic Sans MS",18), bg=color, cursor='arrow', borderwidth=0,
-                                        highlightcolor='yellow', highlightthickness=1, highlightbackground='black',
-                                        textvar=valoresFacil[i][j])
-                
+    
     
 
     # def done_or_not(board):
@@ -308,6 +324,7 @@ def juego_principal():
     # btn.grid(row=20,column=1, columnspan=5, pady=20)
 
     
+
 
     ventana.mainloop()
 
