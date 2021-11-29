@@ -1,8 +1,35 @@
 import argparse
-
+import random
 from tkinter import Tk, Canvas, Frame, Button, BOTH, TOP, BOTTOM
 
-BOARDS = ['facil','debug', 'n00b', 'l33t', 'error']  # Available sudoku boards
+facil = {1: ["806705000",
+     "025380690",
+     "700000020",
+     "003817000",
+     "679000418",
+     "000946300",
+     "060000004",
+     "087094250",
+     "000502706"],
+ 2: ["600009780",
+     "030702490",
+     "090300060",
+     "023817950",
+     "000000000",
+     "061524370",
+     "070003040",
+     "046108030",
+     "089200007"],
+ 3: ["531080000",
+     "984500063",
+     "260009518",
+     "019800602",
+     "308100459",
+     "056920070",
+     "192750006",
+     "873610025",
+     "605390007"]}
+
 MARGIN = 20  # Pixels around the board
 SIDE = 50  # Width of every board cell.
 WIDTH = HEIGHT = MARGIN * 2 + SIDE * 9  # Width and height of the whole board
@@ -13,24 +40,6 @@ class SudokuError(Exception):
     An application specific error.
     """
     pass
-
-
-def parse_arguments():
-    """
-    Parses arguments of the form:
-        sudoku.py <board name>
-    Where `board name` must be in the `BOARD` list
-    """
-    arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("--board",
-                            help="Desired board name",
-                            type=str,
-                            choices=BOARDS,
-                            required=True)
-
-    # Creates a dictionary of keys = argument flag, and value = argument
-    args = vars(arg_parser.parse_args())
-    return args['board']
 
 
 class SudokuUI(Frame):
@@ -54,7 +63,7 @@ class SudokuUI(Frame):
                              height=HEIGHT)
         self.canvas.pack(fill=BOTH, side=TOP)
         clear_button = Button(self,
-                              text="Clear answers",
+                              text="Eliminar respuestas",
                               command=self.__clear_answers)
         clear_button.pack(fill=BOTH, side=BOTTOM)
 
@@ -75,13 +84,13 @@ class SudokuUI(Frame):
             y0 = MARGIN
             x1 = MARGIN + i * SIDE
             y1 = HEIGHT - MARGIN
-            self.canvas.create_line(x0, y0, x1, y1, fill=color)
+            self.canvas.create_line(x0, y0, x1, y1, fill=color, width=3)
 
             x0 = MARGIN
             y0 = MARGIN + i * SIDE
             x1 = WIDTH - MARGIN
             y1 = MARGIN + i * SIDE
-            self.canvas.create_line(x0, y0, x1, y1, fill=color)
+            self.canvas.create_line(x0, y0, x1, y1, fill=color, width=3)
 
     def __draw_puzzle(self):
         self.canvas.delete("numbers")
@@ -94,7 +103,7 @@ class SudokuUI(Frame):
                     original = self.game.start_puzzle[i][j]
                     color = "black" if answer == original else "sea green"
                     self.canvas.create_text(
-                        x, y, text=answer, tags="numbers", fill=color
+                        x, y, text=answer, tags="numbers", fill=color, font=("Comic Sans MS", 16)
                     )
 
     def __draw_cursor(self):
@@ -244,13 +253,14 @@ class SudokuGame(object):
 
 
 if __name__ == '__main__':
-    board_name = parse_arguments()
+    x = random.choice(list(facil.keys()))
+    board_name = facil[x]
+    game = SudokuGame(board_name)
+    game.start()
 
-    with open('%s.sudoku' % board_name, 'r') as boards_file:
-        game = SudokuGame(boards_file)
-        game.start()
-
-        root = Tk()
-        SudokuUI(root, game)
-        root.geometry("%dx%d" % (WIDTH, HEIGHT + 40))
-        root.mainloop()
+    root = Tk()
+    root.main_grid = Frame(
+        root, bd=3, width=270, height=220)
+    SudokuUI(root, game)
+    root.geometry("1000x650")
+    root.mainloop()
