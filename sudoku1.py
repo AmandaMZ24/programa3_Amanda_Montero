@@ -1,6 +1,7 @@
-import argparse
 import random
-from tkinter import Tk, Canvas, Frame, Button, BOTH, TOP, BOTTOM
+from tkinter import Tk, Canvas, Frame, Button, BOTH, TOP, BOTTOM, Toplevel, Menu, messagebox
+import webbrowser
+
 
 facil = {1: ["806705000",
      "025380690",
@@ -62,8 +63,8 @@ class SudokuUI(Frame):
                              width=WIDTH,
                              height=HEIGHT)
         self.canvas.pack(fill=BOTH, side=TOP)
-        clear_button = Button(self,
-                              text="Eliminar respuestas",
+        clear_button = Button(self, bg="#4CFFC0", width=10, height=2, font=("Comic Sans MS", 10, "bold"),
+                              text="BORRAR JUEGO",
                               command=self.__clear_answers)
         clear_button.pack(fill=BOTH, side=BOTTOM)
 
@@ -263,4 +264,71 @@ if __name__ == '__main__':
         root, bd=3, width=270, height=220)
     SudokuUI(root, game)
     root.geometry("1000x650")
+    root.mainloop()
+
+
+    def showMessage(titulo, mensaje):
+        messagebox.showinfo(titulo, mensaje)
+
+    menubar = Menu(root)
+
+
+    # JUGAR
+    jugar_menu = Menu(menubar, tearoff=0)
+
+    jugar_menu.add_command(label="Jugar",
+                        command=SudokuUI(root, game))
+
+    menubar.add_cascade(label="Jugar", menu=jugar_menu)
+
+
+    # CONFIGURAR
+    configurar_menu = Menu(menubar, tearoff=0)
+    configurar_menu.add_command(
+        label="Reloj", command=lambda: showMessage("Reloj", "*agregar opciones*"))
+    configurar_menu.add_command(label="Desplegar mejor jugador", command=lambda: showMessage(
+        "Desplegar mejor jugador", "*agregar opciones*"))
+    menubar.add_cascade(label="Configurar", menu=configurar_menu)
+
+
+    # AYUDA
+    def ayuda():
+        webbrowser.open_new('manual_de_usuario_2048.pdf')
+
+
+    help_menu = Menu(menubar, tearoff=0)
+
+    help_menu.add_command(label="Manual de usuario",
+                        command=lambda: ayuda())
+
+    menubar.add_cascade(label="Ayuda", menu=help_menu)
+
+
+    # ACERCA DE
+    info_menu = Menu(menubar, tearoff=0)
+
+    info_menu.add_command(label="Acerca de",
+                        command=lambda: showMessage("Acerca de", "Programa: Sudoku. \n Versión: 1.7.1.\n Fecha de creación: 1/12/2021 \n Elaborado por: Amanda Montero Z."))
+
+    menubar.add_cascade(label="Acerca de", menu=info_menu)
+
+
+    def salir1():
+        opcion = messagebox.askquestion(
+            title="SALIR", message="¿Está seguro de cerrar el juego? SI/NO")
+        if opcion == "yes":
+            root.destroy()
+        elif opcion == "no":
+            pass
+    # SALIR
+
+
+    exit_menu = Menu(menubar, tearoff=0)
+
+    exit_menu.add_command(label="Salir",
+                        command=salir1)
+
+    menubar.add_cascade(label="Salir", menu=exit_menu)
+    root.config(menu=menubar)
+
     root.mainloop()
