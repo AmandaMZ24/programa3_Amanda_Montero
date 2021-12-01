@@ -1,6 +1,23 @@
+# JUEGO SUDOKU. ELABORADO POR AMANDA MONTERO Z. FECHA DE ENTREGA: 1/12/2021
+
+
 import random
 from tkinter import Tk, Canvas, Frame, Button, BOTH, TOP, BOTTOM, Toplevel, Menu, messagebox
+from tkinter.constants import DISABLED
 import webbrowser
+import time
+import pickle
+
+# ventana de menu
+ventana1 = Tk()
+ventana1.title("Sudoku")
+ventana1.geometry("500x50")
+ventana1.resizable(False, False)
+
+#menu
+menubar = Menu(ventana1)
+
+
 
 
 facil = {1: ["806705000",
@@ -55,31 +72,87 @@ class SudokuUI(Frame):
         self.row, self.col = -1, -1
 
         self.__initUI()
+        
 
     def __initUI(self):
+        global jugadas
+        global x
+        global y
+        global juego
+
+        juego = True
+
         self.parent.title("Sudoku")
-        self.pack(fill=BOTH)
+        self.pack()
         self.canvas = Canvas(self,
-                             width=WIDTH,
-                             height=HEIGHT)
-        self.canvas.pack(fill=BOTH, side=TOP)
-        clear_button = Button(self, bg="#4CFFC0", width=10, height=2, font=("Comic Sans MS", 10, "bold"),
+                             width=1000,
+                             height=650)
+        self.canvas.pack()
+
+        
+        clear_button = Button(self, bg="#56B2B0",
                               text="BORRAR JUEGO",
                               command=self.__clear_answers)
-        clear_button.pack(fill=BOTH, side=BOTTOM)
+        clear_button.configure(width=20, height=2, font=("Comic Sans MS", 10, "bold"))
+        clear_button.place(x=250, y=500)
 
+        deshacer_boton = Button(self, bg="#00FFF9", width=20, height=2, font=("Comic Sans MS", 10, "bold"),
+                                text="DESHACER JUGADA",
+                                command=self.deshacer_mov)
+        deshacer_boton.place(x=450, y=500)
+
+        rehacer_boton = Button(self, bg="#00FFF9", width=20, height=2, font=("Comic Sans MS", 10, "bold"),
+                                text="REHACER JUGADA")
+        rehacer_boton.place(x=650, y=500)
+
+
+        # guardar partida
+
+        # def guardar_juego1():
+        #     archivo_juego = open("sudoku2021jugadas.dat", "wb")
+        #     pickle.dump(self.matrix, archivo_juego)
+        #     opcion = messagebox.askquestion(
+        #         title="SALIR", message="¿Va a continuar jugando? SI/NO")
+        #     if opcion == "yes":
+        #         pass
+        #     elif opcion == "no":
+        #         self.destroy()
+        guardar_boton = Button(self, bg="#CFCFCF", width=20, height=2, font=("Comic Sans MS", 10, "bold"),
+                               text="GUARDAR PARTIDA"
+                               )
+        guardar_boton.place(x=250, y=570)
+
+        # cargar partida
+        # def cargar_juego1():
+        #     archivo_juego = open("sudoku2021jugadas.dat", "rb")
+        #     self.matrix = pickle.load(archivo_juego)
+        #     self.update()
+                
+
+        cargar_boton = Button(self, bg="#CFCFCF", width=20, height=2, font=("Comic Sans MS", 10, "bold"),
+                              text="CARGAR PARTIDA")
+        cargar_boton.place(x=450, y=570)
+
+
+        
+    
         self.__draw_grid()
         self.__draw_puzzle()
 
-        self.canvas.bind("<Button-1>", self.__cell_clicked)
-        self.canvas.bind("<Key>", self.__key_pressed)
+        jugadas = []
+
+        x = self.canvas.bind("<Button-1>", self.__cell_clicked)
+        y = self.canvas.bind("<Key>", self.__key_pressed)
+        
+        
+        
 
     def __draw_grid(self):
         """
         Draws grid divided with blue lines into 3x3 squares
         """
         for i in range(10):
-            color = "blue" if i % 3 == 0 else "gray"
+            color = "#9D0000" if i % 3 == 0 else "gray"
 
             x0 = MARGIN + i * SIDE
             y0 = MARGIN
@@ -131,11 +204,14 @@ class SudokuUI(Frame):
         x = y = MARGIN + 4 * SIDE + SIDE / 2
         self.canvas.create_text(
             x, y,
-            text="You win!", tags="victory",
-            fill="white", font=("Arial", 32)
+            text="¡EXCELENTE! \nJUEGO COMPLETADO", tags="victory",
+            fill="white", font=("Arial", 16)
         )
 
     def __cell_clicked(self, event):
+        global jugadas
+        global row
+        global col
         if self.game.game_over:
             return
         x, y = event.x, event.y
@@ -154,8 +230,13 @@ class SudokuUI(Frame):
             self.row, self.col = -1, -1
 
         self.__draw_cursor()
+        jugadas.append([row, col])
+        
+        #print(jugadas)
 
     def __key_pressed(self, event):
+        global jugadas
+        global char
         if self.game.game_over:
             return
         if self.row >= 0 and self.col >= 0 and event.char in "1234567890":
@@ -165,12 +246,32 @@ class SudokuUI(Frame):
             self.__draw_cursor()
             if self.game.check_win():
                 self.__draw_victory()
+        jugadas[-1].append(event.char)
+
+        print(jugadas)
 
     def __clear_answers(self):
         self.game.start()
         self.canvas.delete("victory")
         self.__draw_puzzle()
 
+    def deshacer_mov(self):
+        global jugadas
+        
+        self.canvas.delete("numbers")
+        for i in range(jugadas[-1][0]):
+            for j in range(jugadas[-1][1]):
+                answer = ""
+                if answer != 0:
+                    x = MARGIN + j * SIDE + SIDE / 2
+                    y = MARGIN + i * SIDE + SIDE / 2
+                    original = self.game.start_puzzle[i][j]
+                    color = "black" if answer == original else "sea green"
+                    self.canvas.create_text(
+                        x, y, text=answer, tags="numbers", fill=color, font=("Comic Sans MS", 16)
+                    )
+        jugadas.pop(-1)
+    
 
 class SudokuBoard(object):
     """
@@ -217,6 +318,7 @@ class SudokuGame(object):
             self.puzzle.append([])
             for j in range(9):
                 self.puzzle[i].append(self.start_puzzle[i][j])
+        self.juego=False
 
     def check_win(self):
         for row in range(9):
@@ -253,82 +355,146 @@ class SudokuGame(object):
         )
 
 
-if __name__ == '__main__':
-    x = random.choice(list(facil.keys()))
-    board_name = facil[x]
-    game = SudokuGame(board_name)
-    game.start()
+class Jugadas_hechas:
+    def __init__(self, row, col, elemento):
+        self.fila = row
+        self.columna = col
+        self.elemento = elemento
 
-    root = Tk()
-    root.main_grid = Frame(
-        root, bd=3, width=270, height=220)
-    SudokuUI(root, game)
-    root.geometry("1000x650")
-    root.mainloop()
+    def obtener_jugada_hecha(self):
+        return self.fila, self.columna, self.elemento
+
+# clase para implementar función rehacer jugadas
 
 
-    def showMessage(titulo, mensaje):
-        messagebox.showinfo(titulo, mensaje)
+class Jugadas_eliminadas:
+    def __init__(self, fila, columna, elemento):
+        self.fila = fila
+        self.columna = columna
+        self.elemento = elemento
 
-    menubar = Menu(root)
-
-
-    # JUGAR
-    jugar_menu = Menu(menubar, tearoff=0)
-
-    jugar_menu.add_command(label="Jugar",
-                        command=SudokuUI(root, game))
-
-    menubar.add_cascade(label="Jugar", menu=jugar_menu)
+    def obtener_jugada_eliminada(self):
+        return self.fila, self.columna, self.elemento
 
 
-    # CONFIGURAR
-    configurar_menu = Menu(menubar, tearoff=0)
-    configurar_menu.add_command(
-        label="Reloj", command=lambda: showMessage("Reloj", "*agregar opciones*"))
-    configurar_menu.add_command(label="Desplegar mejor jugador", command=lambda: showMessage(
-        "Desplegar mejor jugador", "*agregar opciones*"))
-    menubar.add_cascade(label="Configurar", menu=configurar_menu)
+# definición de las pilas
+pila_jugadas_hechas = []
+pila_jugadas_eliminadas = []
+
+# ejemplo de jugadas hechas: cada jugada hecha se agrega a la pila
+j = Jugadas_hechas(3, 6, 9)
+pila_jugadas_hechas.append(j)
+j = Jugadas_hechas(2, 6, 4)
+pila_jugadas_hechas.append(j)
+j = Jugadas_hechas(1, 2, 2)
+pila_jugadas_hechas.append(j)
+
+# seleccionamos botón DESHACER JUGADA
+ultima_jugada = pila_jugadas_hechas.pop()
 
 
-    # AYUDA
-    def ayuda():
-        webbrowser.open_new('manual_de_usuario_2048.pdf')
+ultima_jugada = pila_jugadas_hechas.pop()
 
 
-    help_menu = Menu(menubar, tearoff=0)
+# las jugadas eliminadas se guardan en la pila de jugadas elimiinadas en caso
+# de que seleccionemos botón REHACER JUGADA
 
-    help_menu.add_command(label="Manual de usuario",
-                        command=lambda: ayuda())
+je = Jugadas_eliminadas(
+    ultima_jugada.fila, ultima_jugada.columna, ultima_jugada.elemento)
+pila_jugadas_eliminadas.append(je)
 
-    menubar.add_cascade(label="Ayuda", menu=help_menu)
+# seleccionamos botón REHACER JUGADA
+ultima_jugada = pila_jugadas_eliminadas.pop()
+#print(ultima_jugada.obtener_jugada_eliminada())
 
-
-    # ACERCA DE
-    info_menu = Menu(menubar, tearoff=0)
-
-    info_menu.add_command(label="Acerca de",
-                        command=lambda: showMessage("Acerca de", "Programa: Sudoku. \n Versión: 1.7.1.\n Fecha de creación: 1/12/2021 \n Elaborado por: Amanda Montero Z."))
-
-    menubar.add_cascade(label="Acerca de", menu=info_menu)
-
-
-    def salir1():
-        opcion = messagebox.askquestion(
-            title="SALIR", message="¿Está seguro de cerrar el juego? SI/NO")
-        if opcion == "yes":
-            root.destroy()
-        elif opcion == "no":
-            pass
-    # SALIR
+#iniciar juego
+juego = False
+def __iniciar_juego():
+    global juego
+    juego = True
 
 
-    exit_menu = Menu(menubar, tearoff=0)
+def jugar():
+    global iniciar_boton
+    if __name__ == '__main__':
+        x = random.choice(list(facil.keys()))
+        board_name = facil[x]
+        game = SudokuGame(board_name)
+        game.start()
 
-    exit_menu.add_command(label="Salir",
-                        command=salir1)
+        root = Toplevel(ventana1)
+        SudokuUI(root, game)
+        root.geometry("1000x650")
+        root.resizable(False, False)
 
-    menubar.add_cascade(label="Salir", menu=exit_menu)
-    root.config(menu=menubar)
+        # iniciar partida
+        iniciar_boton = Button(root, bg="#BB00C9", width=20, height=2, font=("Comic Sans MS", 10, "bold"),
+                            text="INICIAR JUEGO", command=__iniciar_juego())
+        iniciar_boton.place(x=50, y=500)
 
-    root.mainloop()
+
+        root.mainloop()
+
+
+def showMessage(titulo, mensaje):
+    messagebox.showinfo(titulo, mensaje)
+
+
+# JUGAR
+jugar_menu = Menu(menubar, tearoff=0)
+
+jugar_menu.add_command(label="Jugar", command=jugar)
+
+menubar.add_cascade(label="Jugar", menu=jugar_menu)
+
+
+# CONFIGURAR
+configurar_menu = Menu(menubar, tearoff=0)
+configurar_menu.add_command(
+    label="Reloj", command=lambda: showMessage("Reloj", "*agregar opciones*"))
+configurar_menu.add_command(label="Desplegar mejor jugador", command=lambda: showMessage(
+    "Desplegar mejor jugador", "*agregar opciones*"))
+menubar.add_cascade(label="Configurar", menu=configurar_menu)
+
+
+# AYUDA
+def ayuda():
+    webbrowser.open_new('manual_de_usuario_2048.pdf')
+
+
+help_menu = Menu(menubar, tearoff=0)
+
+help_menu.add_command(label="Manual de usuario",
+                      command=lambda: ayuda())
+
+menubar.add_cascade(label="Ayuda", menu=help_menu)
+
+
+# ACERCA DE
+info_menu = Menu(menubar, tearoff=0)
+
+info_menu.add_command(label="Acerca de",
+                      command=lambda: showMessage("Acerca de", "Programa: Sudoku. \n Versión: 1.7.1.\n Fecha de creación: 1/12/2021 \n Elaborado por: Amanda Montero Z."))
+
+menubar.add_cascade(label="Acerca de", menu=info_menu)
+
+
+def salir1():
+    opcion = messagebox.askquestion(
+        title="SALIR", message="¿Está seguro de cerrar el juego? SI/NO")
+    if opcion == "yes":
+        ventana1.destroy()
+    elif opcion == "no":
+        pass
+# SALIR
+
+
+exit_menu = Menu(menubar, tearoff=0)
+
+exit_menu.add_command(label="Salir",
+                      command=salir1)
+
+menubar.add_cascade(label="Salir", menu=exit_menu)
+ventana1.config(menu=menubar)
+
+ventana1.mainloop()
